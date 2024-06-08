@@ -1,0 +1,14 @@
+#! /bin/sh
+
+last_commit_date=$(git log -1 --format=%cd --date=short)
+year=$(echo "$last_commit_date" | cut -d '-' -f 1)
+month=$(echo "$last_commit_date" | cut -d '-' -f 2)
+day=$(echo "$last_commit_date" | cut -d '-' -f 3)
+
+commits_today=$(git log --format=%cd --date=short | grep -c "^$last_commit_date")
+
+major="$year"
+minor=$(echo "$month" | sed 's/^0//g')
+minor="$minor$day"
+
+echo "$major.$minor.$commits_today"
