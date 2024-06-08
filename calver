@@ -3,15 +3,85 @@
 set -e
 set -u
 
-last_commit_date=$(git log -1 --format=%cd --date=short)
+cmd=$(basename "$0")
+
+bailing()
+{
+    echo>&2 "$cmd: bailing, $*"
+}
+
+usage()
+{
+    echo "Usage: $cmd [--help] [--stdin]"
+}
+
+help()
+{
+    cat <<EOF
+calver - generate a calendar version based on commit history
+
+Usage:
+  $cmd [options]
+
+Options:
+  --help   show this help
+  --stdin  read commit list from stdin instead of calling out to git
+EOF
+}
+
+stdin=no
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        --stdin)
+            stdin=yes
+            ;;
+        --help)
+            help
+            exit 0
+            ;;
+        *)
+            bailing "unknown option: $1"
+            usage>&2
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+if [ "$stdin" = yes ]
+then
+    if [ -t 0 ]
+    then
+        bailing "nothing to read on stdin"
+        usage>&2
+        exit 1
+    fi
+    commit_list=$(cat)
+else
+    commit_list=$(git log --date=short --format=%cd)
+fi
+
+if [ ! "$commit_list" = "$(echo "$commit_list" | sort -r)" ]
+then
+    # Making no assumptions about the order of the commit list for now
+    # but I think they can be in any order...
+    bailing "commit list is not in order"
+    exit 1
+fi
+
+last_commit_date=$(echo "$commit_list" | head -n 1)
 year=$(echo "$last_commit_date" | cut -d '-' -f 1)
 month=$(echo "$last_commit_date" | cut -d '-' -f 2)
 day=$(echo "$last_commit_date" | cut -d '-' -f 3)
 
-commits_today=$(git log --format=%cd --date=short | grep -c "^$last_commit_date")
-
 major="$year"
-minor=$(echo "$month" | sed 's/^0//g')
-minor="$minor$day"
 
-echo "$major.$minor.$commits_today"
+month=$(echo "$month" | sed 's/^0*//')
+day=$(echo "$day" | sed 's/^0*//')
+minor=$((month * 100 + day))
+
+patch=$(echo "$commit_list" | grep -c "^$last_commit_date")
+
+echo "$major.$minor.$patch"
