@@ -28,6 +28,9 @@ EOF
 cat <<EOF | assert_version "1970.111.1"
 1970-01-11
 EOF
+cat <<EOF | assert_version "1970.1001.1"
+1970-10-01
+EOF
 cat <<EOF | assert_version "1970.1101.1"
 1970-11-01
 EOF
