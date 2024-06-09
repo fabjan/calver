@@ -24,8 +24,8 @@ Usage:
 
 Options:
   --help              show this help
-  --stdin             read commit list from stdin instead of calling out to git
-  --prerelease <tag>  generate a prerelease version based on the given tag (lowercase letters only)
+  --stdin             read commit list from stdin instead of asking 'git'
+  --prerelease <tag>  generate a prerelease tag (lowercase letters only)
 EOF
 }
 
