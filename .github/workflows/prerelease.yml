@@ -12,6 +12,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 100
-      - run: gh release create $(./calver --prerelease "$GITHUB_REF_NAME") ./calver --generate-notes --prerelease
+      - run: gh release create $(./calver --prerelease "$GITHUB_REF_NAME") ./calver --prerelease --notes $(git log main.."$GITHUB_REF_NAME" --oneline)
         env:
           GH_TOKEN: ${{ github.token }}
