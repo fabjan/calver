@@ -13,6 +13,6 @@ jobs:
         with:
           fetch-depth: 100
       - run: git fetch origin main --depth 1
-      - run: gh release create $(./calver --prerelease "$GITHUB_REF_NAME") ./calver --prerelease --notes $(git log main.."$GITHUB_REF_NAME" --oneline)
+      - run: gh release create $(./calver --prerelease "$GITHUB_REF_NAME") ./calver --prerelease --notes $(git log origin/main.."$GITHUB_REF_NAME" --oneline)
         env:
           GH_TOKEN: ${{ github.token }}
