@@ -1,7 +1,6 @@
 #! /bin/sh
 
 set -e
-set -u
 
 cmd=$(basename "$0")
 
@@ -12,7 +11,7 @@ bailing()
 
 usage()
 {
-    echo "Usage: $cmd [--help] [--stdin]"
+    echo "Usage: $cmd [--help] [--stdin] [--prerelease <tag>]" >&2
 }
 
 help()
@@ -24,18 +23,30 @@ Usage:
   $cmd [options]
 
 Options:
-  --help   show this help
-  --stdin  read commit list from stdin instead of calling out to git
+  --help              show this help
+  --stdin             read commit list from stdin instead of calling out to git
+  --prerelease <tag>  generate a prerelease version based on the given tag (lowercase letters only)
 EOF
 }
 
 stdin=no
+prerelease=""
 
 while [ $# -gt 0 ]
 do
     case "$1" in
         --stdin)
             stdin=yes
+            ;;
+        --prerelease)
+            prerelease="$2"
+            if [ -z "$prerelease" ]
+            then
+                bailing "missing argument for --prerelease"
+                usage>&2
+                exit 1
+            fi
+            shift
             ;;
         --help)
             help
@@ -49,6 +60,18 @@ do
     esac
     shift
 done
+
+# we couldn't use set -u until we've parsed the options
+set -u
+
+# let's start with only allowing lowercase english letters,
+# expanding later is easier than restricting later
+if echo "$prerelease" | LC_ALL=C grep -q '[^a-z]'
+then
+    bailing "prerelease tag must be lowercase letters only"
+    usage>&2
+    exit 1
+fi
 
 if [ "$stdin" = yes ]
 then
@@ -84,4 +107,16 @@ minor=$((month * 100 + day))
 
 patch=$(echo "$commit_list" | grep -c "^$last_commit_date")
 
-echo "$major.$minor.$patch"
+case "$prerelease" in
+    "")
+        ;;
+    *)
+        # Using patch twice here might look weird, but it should make sense
+        # since the first one does represent what will be the patch number for
+        # release if cut now and the second one is the number of commits in
+        # this (presumed) prerelease branch.
+        prerelease="-$prerelease.$patch"
+        ;;
+esac
+
+echo "$major.$minor.$patch$prerelease"
