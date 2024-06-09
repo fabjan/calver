@@ -87,10 +87,10 @@ EOF
 echo "OK"
 
 printf "Testing --prerelease flag "
-cat <<EOF | assert_version "1970.101.1-alpha.1" --prerelease alpha
+cat <<EOF | assert_version "1970.101.0-alpha.1" --prerelease alpha
 1970-01-01
 EOF
-cat <<EOF | assert_version "1970.101.3-omega.3" --prerelease omega
+cat <<EOF | assert_version "1970.101.0-omega.3" --prerelease omega
 1970-01-01
 1970-01-01
 1970-01-01

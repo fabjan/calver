@@ -105,17 +105,19 @@ month=$(echo "$month" | sed 's/^0*//')
 day=$(echo "$day" | sed 's/^0*//')
 minor=$((month * 100 + day))
 
-patch=$(echo "$commit_list" | grep -c "^$last_commit_date")
+commit_count=$(echo "$commit_list" | grep -c "^$last_commit_date")
 
 case "$prerelease" in
     "")
+        patch="$commit_count"
         ;;
     *)
-        # Using patch twice here might look weird, but it should make sense
-        # since the first one does represent what will be the patch number for
-        # release if cut now and the second one is the number of commits in
-        # this (presumed) prerelease branch.
-        prerelease="-$prerelease.$patch"
+        # This means multiple prereleases can have the same base version but
+        # as long as you don't use the same tag for different prereleases
+        # there is no ambiguity. Before making a release we can't know which
+        # patch version to use anyway.
+        patch=0
+        prerelease="-$prerelease.$commit_count"
         ;;
 esac
 
