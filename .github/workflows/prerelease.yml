@@ -1,0 +1,15 @@
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  prerelease:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh release create $(./calver --prerelease $(git rev-parse --abbrev-ref HEAD)) ./calver --generate-notes --prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
