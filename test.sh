@@ -95,18 +95,33 @@ cat <<EOF | assert_version "1970.101.0-omega.3" --prerelease omega
 1970-01-01
 1970-01-01
 EOF
+cat <<EOF | assert_version "3000.1231.0-gamma-delta-epsilon.1" --prerelease gamma-delta-epsilon
+3000-12-31
+EOF
+
 cat <<EOF | assert_bail "lowercase letters only" --prerelease BETA
 3000-12-31
 EOF
 cat <<EOF | assert_bail "lowercase letters only" --prerelease 4711
 3000-12-31
 EOF
-cat <<EOF | assert_bail "lowercase letters only" --prerelease gamma-delta-epsilon
-3000-12-31
-EOF
 cat <<EOF | assert_bail "lowercase letters only" --prerelease åäö
 1970-01-01
 EOF
 echo "OK"
+
+echo "Testing --timestamp flag "
+# compare for both before and after the call to calver in case the test runs over a minute boundary
+ts_minute_before=$(date '+%Y.%-m%d.%-H%M')
+ts_version=$(./calver --timestamp)
+ts_minute_after=$(date '+%Y.%-m%d.%-H%M')
+
+if [ ! "$ts_version" = "$ts_minute_before" ] && [ ! "$ts" = "$ts_minute_after" ]
+then
+    echo
+    echo "Expected: $at_minute_before or $at_minute_after"
+    echo "Actual:   $ts_version"
+    exit 1
+fi
 
 echo "All tests passed"
