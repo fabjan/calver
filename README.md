@@ -1,14 +1,15 @@
 # calver
 
-Generate a [CalVer] version string from a log of Git commits.
+Generate a [CalVer] version string from a Git log or the current time.
 
-Assuming you are not rewriting history in your release branches, `calver` can
-just be used in CI without having to use your git tags for persistence.
+`calver` is stateless and will only read your Git log or output from `date`.
 
 ## CalVer interpretation
 
 `calver` will make a version string triple that is not incompatible with the
 SemVer syntax: there are no leading zeroes.
+
+### Based on Git commits
 
 Given a git log, the version string `MAJOR.MINOR.PATCH` will be printed, where
 
@@ -19,6 +20,19 @@ Given a git log, the version string `MAJOR.MINOR.PATCH` will be printed, where
 To stay somewhat readable and still be ordered properly and agree with SemVer
 syntax, the `MINOR` version is calculated by adding the day with 100 * the
 month: January 1 is `101`, January 11 is `111`, November 1 is `1101`, etc.
+
+### Based on current time
+
+With the `--timestamp` option, the string `MAJOR.MINOR.PATCH` is printed,
+
+* `MAJOR` is the current year
+* `MINOR` is the current month and day
+* `PATCH` is the current hour and minute
+
+To stay somewhat readable and still be ordered properly and agree with SemVer
+syntax, the `MINOR` version is calculated by adding the day with 100 * the
+month: January 1 is `101`, January 11 is `111`, November 1 is `1101`, etc.
+and the `PATCH` version is calculated similarly using hours and minutes.
 
 ## Example
 
@@ -43,6 +57,13 @@ The last commit was on August 6 2023 and there were six commits in total that da
 ```
 ❯ calver
 2023.806.6
+```
+
+If you are executing the script using `--timestamp` on October 27 2024:
+
+```
+❯ ./calver --timestamp
+2024.1027.1337
 ```
 
 [CalVer]: https://calver.org
