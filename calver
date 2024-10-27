@@ -81,9 +81,9 @@ then
     exit 1
 fi
 
-# let's start with only allowing lowercase english letters,
+# let's start with only allowing lowercase english letters and dashes,
 # expanding later is easier than restricting later
-if echo "$prerelease" | LC_ALL=C grep -q '[^a-z]'
+if echo "$prerelease" | LC_ALL=C grep -q '[^a-z-]'
 then
     bailing "prerelease tag must be lowercase letters only"
     usage>&2

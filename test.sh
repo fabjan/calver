@@ -95,13 +95,14 @@ cat <<EOF | assert_version "1970.101.0-omega.3" --prerelease omega
 1970-01-01
 1970-01-01
 EOF
+cat <<EOF | assert_version "3000.1231.0-gamma-delta-epsilon.1" --prerelease gamma-delta-epsilon
+3000-12-31
+EOF
+
 cat <<EOF | assert_bail "lowercase letters only" --prerelease BETA
 3000-12-31
 EOF
 cat <<EOF | assert_bail "lowercase letters only" --prerelease 4711
-3000-12-31
-EOF
-cat <<EOF | assert_bail "lowercase letters only" --prerelease gamma-delta-epsilon
 3000-12-31
 EOF
 cat <<EOF | assert_bail "lowercase letters only" --prerelease åäö
