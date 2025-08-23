@@ -14,8 +14,8 @@ usage()
     cat <<EOF
 
 Usage:
-  $cmd [--stdin] [--prerelease <tag>]
-  $cmd --timestamp
+  $cmd [--stdin] [--prerelease <tag>] [--dayofyear]
+  $cmd --timestamp [--dayofyear]
   $cmd --help
 EOF
 }
@@ -31,12 +31,14 @@ Options:
   --stdin             read commit list from stdin instead of asking 'git'
   --prerelease <tag>  generate a prerelease tag (lowercase letters only)
   --timestamp         generate from current time instead of commit history
+  --dayofyear         use day of year (1-366) instead of month/day for minor version
 EOF
 }
 
 stdin=no
 prerelease=""
 timestamp=no
+dayofyear=no
 
 while [ $# -gt 0 ]
 do
@@ -56,6 +58,9 @@ do
             ;;
         --timestamp)
             timestamp=yes
+            ;;
+        --dayofyear)
+            dayofyear=yes
             ;;
         --help)
             help
@@ -115,14 +120,22 @@ calculate_from_git()
 
     last_commit_date=$(echo "$commit_list" | head -n 1)
     year=$(echo "$last_commit_date" | cut -d '-' -f 1)
-    month=$(echo "$last_commit_date" | cut -d '-' -f 2)
-    month=$(echo "$month" | sed 's/^0*//')
-    day=$(echo "$last_commit_date" | cut -d '-' -f 3)
-    day=$(echo "$day" | sed 's/^0*//')
+    
+    if [ "$dayofyear" = yes ]
+    then
+        day_of_year=$(date -d "$last_commit_date" +%j)
+        day_of_year=$(echo "$day_of_year" | sed 's/^0*//')
+        minor="$day_of_year"
+    else
+        month=$(echo "$last_commit_date" | cut -d '-' -f 2)
+        month=$(echo "$month" | sed 's/^0*//')
+        day=$(echo "$last_commit_date" | cut -d '-' -f 3)
+        day=$(echo "$day" | sed 's/^0*//')
+        minor=$((month * 100 + day))
+    fi
 
     # set global variables
     major="$year"
-    minor=$((month * 100 + day))
     patch=$(echo "$commit_list" | grep -c "^$last_commit_date")
 }
 
@@ -130,7 +143,13 @@ if [ "$timestamp" = yes ]
 then
     # set global variables
     major=$(date +%Y)
-    minor=$(date +%m%d)
+    if [ "$dayofyear" = yes ]
+    then
+        day_of_year=$(date +%j)
+        minor=$(echo "$day_of_year" | sed 's/^0*//')
+    else
+        minor=$(date +%m%d)
+    fi
     patch=$(date +%H%M)
 else
     calculate_from_git
