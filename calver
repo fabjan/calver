@@ -14,8 +14,8 @@ usage()
     cat <<EOF
 
 Usage:
-  $cmd [--stdin] [--prerelease <tag>]
-  $cmd --timestamp
+  $cmd [--stdin] [--prerelease <tag>] [--dayofyear]
+  $cmd --timestamp [--dayofyear]
   $cmd --help
 EOF
 }
@@ -31,12 +31,14 @@ Options:
   --stdin             read commit list from stdin instead of asking 'git'
   --prerelease <tag>  generate a prerelease tag (lowercase letters only)
   --timestamp         generate from current time instead of commit history
+  --dayofyear         use day of year (1-366) instead of month/day for minor version
 EOF
 }
 
 stdin=no
 prerelease=""
 timestamp=no
+dayofyear=no
 
 while [ $# -gt 0 ]
 do
@@ -56,6 +58,9 @@ do
             ;;
         --timestamp)
             timestamp=yes
+            ;;
+        --dayofyear)
+            dayofyear=yes
             ;;
         --help)
             help
@@ -114,24 +119,34 @@ calculate_from_git()
     fi
 
     last_commit_date=$(echo "$commit_list" | head -n 1)
-    year=$(echo "$last_commit_date" | cut -d '-' -f 1)
-    month=$(echo "$last_commit_date" | cut -d '-' -f 2)
-    month=$(echo "$month" | sed 's/^0*//')
-    day=$(echo "$last_commit_date" | cut -d '-' -f 3)
-    day=$(echo "$day" | sed 's/^0*//')
 
     # set global variables
-    major="$year"
-    minor=$((month * 100 + day))
+    major=$(date -d "$last_commit_date" +%Y)
+    minor=$(date -d "$last_commit_date" +%-m%d)
     patch=$(echo "$commit_list" | grep -c "^$last_commit_date")
+
+    if [ "$dayofyear" = yes ]
+    then
+        minor=$(date -d "$last_commit_date" +%-j)
+    fi
 }
 
-if [ "$timestamp" = yes ]
-then
+calculate_from_timestamp()
+{
     # set global variables
     major=$(date +%Y)
     minor=$(date +%-m%d)
     patch=$(date +%-H%M)
+
+    if [ "$dayofyear" = yes ]
+    then
+        minor=$(date +%-j)
+    fi
+}
+
+if [ "$timestamp" = yes ]
+then
+    calculate_from_timestamp
 else
     calculate_from_git
 fi

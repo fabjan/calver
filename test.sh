@@ -69,6 +69,40 @@ cat <<EOF | assert_version "2031.1231.1"
 EOF
 echo "OK"
 
+printf "Testing --dayofyear flag "
+cat <<EOF | assert_version "1970.1.1" --dayofyear
+1970-01-01
+EOF
+cat <<EOF | assert_version "1970.60.1" --dayofyear
+1970-03-01
+EOF
+cat <<EOF | assert_version "2024.60.1" --dayofyear
+2024-02-29
+EOF
+cat <<EOF | assert_version "2024.61.1" --dayofyear
+2024-03-01
+EOF
+cat <<EOF | assert_version "2023.60.1" --dayofyear
+2023-03-01
+EOF
+cat <<EOF | assert_version "2024.366.1" --dayofyear
+2024-12-31
+EOF
+cat <<EOF | assert_version "2023.365.1" --dayofyear
+2023-12-31
+EOF
+echo "OK"
+
+printf "Testing --dayofyear with --prerelease "
+cat <<EOF | assert_version "1970.1.0-alpha.1" --dayofyear --prerelease alpha
+1970-01-01
+EOF
+cat <<EOF | assert_version "2024.61.0-beta.2" --dayofyear --prerelease beta
+2024-03-01
+2024-03-01
+EOF
+echo "OK"
+
 printf "Testing patch version calculation "
 cat <<EOF | assert_version "1970.102.5"
 1970-01-02
