@@ -119,38 +119,34 @@ calculate_from_git()
     fi
 
     last_commit_date=$(echo "$commit_list" | head -n 1)
-    year=$(echo "$last_commit_date" | cut -d '-' -f 1)
-    
-    if [ "$dayofyear" = yes ]
-    then
-        day_of_year=$(date -d "$last_commit_date" +%j)
-        day_of_year=$(echo "$day_of_year" | sed 's/^0*//')
-        minor="$day_of_year"
-    else
-        month=$(echo "$last_commit_date" | cut -d '-' -f 2)
-        month=$(echo "$month" | sed 's/^0*//')
-        day=$(echo "$last_commit_date" | cut -d '-' -f 3)
-        day=$(echo "$day" | sed 's/^0*//')
-        minor=$((month * 100 + day))
-    fi
 
     # set global variables
-    major="$year"
+    major=$(date -d "$last_commit_date" +%Y)
+    minor=$(date -d "$last_commit_date" +%-m%d)
     patch=$(echo "$commit_list" | grep -c "^$last_commit_date")
+
+    if [ "$dayofyear" = yes ]
+    then
+        minor=$(date -d "$last_commit_date" +%-j)
+    fi
+}
+
+calculate_from_timestamp()
+{
+    # set global variables
+    major=$(date +%Y)
+    minor=$(date +%-m%d)
+    patch=$(date +%-H%M)
+
+    if [ "$dayofyear" = yes ]
+    then
+        minor=$(date +%-j)
+    fi
 }
 
 if [ "$timestamp" = yes ]
 then
-    # set global variables
-    major=$(date +%Y)
-    if [ "$dayofyear" = yes ]
-    then
-        day_of_year=$(date +%j)
-        minor=$(echo "$day_of_year" | sed 's/^0*//')
-    else
-        minor=$(date +%-m%d)
-    fi
-    patch=$(date +%-H%M)
+    calculate_from_timestamp
 else
     calculate_from_git
 fi
