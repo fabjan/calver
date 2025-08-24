@@ -1,7 +1,5 @@
 #! /bin/sh
 
-#shellcheck disable=SC2002
-
 set -e
 set -u
 
@@ -14,7 +12,7 @@ assert_version()
 
     if [ ! "$expected_version" = "$actual_version" ]
     then
-        echo
+        echo "FAIL"
         echo "Expected: $expected_version"
         echo "Actual:   $actual_version"
         exit 1
@@ -34,14 +32,14 @@ assert_bail()
 
     if [ ! $exit_code -eq 1 ]
     then
-        echo
+        echo "FAIL"
         echo "Expected to bail out"
         exit 1
     fi
 
     if ! echo "$msg" | grep -q "$expected_msg"
     then
-        echo
+        echo "FAIL"
         echo "Expected: .*$expected_msg.*"
         echo "Actual:   $msg"
         exit 1
@@ -144,18 +142,21 @@ cat <<EOF | assert_bail "lowercase letters only" --prerelease åäö
 EOF
 echo "OK"
 
-echo "Testing --timestamp flag "
+printf "Testing --timestamp flag "
 # compare for both before and after the call to calver in case the test runs over a minute boundary
 ts_minute_before=$(date '+%Y.%-m%d.%-H%M')
 ts_version=$(./calver --timestamp)
 ts_minute_after=$(date '+%Y.%-m%d.%-H%M')
 
-if [ ! "$ts_version" = "$ts_minute_before" ] && [ ! "$ts" = "$ts_minute_after" ]
+if [ ! "$ts_version" = "$ts_minute_before" ] && [ ! "$ts_version" = "$ts_minute_after" ]
 then
-    echo
-    echo "Expected: $at_minute_before or $at_minute_after"
+    echo "FAIL"
+    echo "Expected: $ts_minute_before or $ts_minute_after"
     echo "Actual:   $ts_version"
     exit 1
 fi
+printf .
+
+echo "OK"
 
 echo "All tests passed"

@@ -148,9 +148,9 @@ then
         day_of_year=$(date +%j)
         minor=$(echo "$day_of_year" | sed 's/^0*//')
     else
-        minor=$(date +%m%d)
+        minor=$(date +%-m%d)
     fi
-    patch=$(date +%H%M)
+    patch=$(date +%-H%M)
 else
     calculate_from_git
 fi
