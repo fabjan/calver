@@ -130,8 +130,8 @@ if [ "$timestamp" = yes ]
 then
     # set global variables
     major=$(date +%Y)
-    minor=$(date +%m%d)
-    patch=$(date +%H%M)
+    minor=$(date +%-m%d)
+    patch=$(date +%-H%M)
 else
     calculate_from_git
 fi
